@@ -43,7 +43,9 @@ Businesses that already have a working website are excluded (they are not leads)
 | `Business Name` | Name as listed in OpenStreetMap |
 | `Website Status` | `No website` or `Broken website` |
 | `Phone` / `Email` | Contact details (where available) |
-| `Street` / `Postcode` / `Town` | Address for in-person visits or postal mail |
+| `Full Address` | Street + number + postcode + town in one line (for in-person visits) |
+| `Street` / `Postcode` / `Town` | Address parts (split out for sorting/filtering) |
+| `Google Maps Link` | Tap-to-navigate map pin (from exact coordinates) — for driving to the business |
 | `Source URL (if broken)` | The dead/broken site (use as the opener: "your site is down") |
 | `Notes` | HTTP error for broken sites |
 | `Outreach Status` | Pipeline tracking — start as `Not contacted`, then `Contacted`, `Replied`, `Meeting`, `Won`, `Lost` |

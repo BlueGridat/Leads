@@ -17,6 +17,7 @@ Outputs:
 
 import json
 import csv
+import urllib.parse
 
 RAW = "/projects/sandbox/Leads/data/linz_raw.json"
 CSV_OUT = "/projects/sandbox/Leads/leads.csv"
@@ -84,11 +85,32 @@ def priority(r):
     return "COOL - visit/mail"
 
 
-def full_address(r):
+def full_street(r):
+    """Just street + house number (no town)."""
     line = r["street"]
     if r["housenumber"]:
         line = f"{line} {r['housenumber']}".strip()
     return line
+
+
+def full_address(r):
+    """Street + number, postcode + town — a single human-readable address line."""
+    line = full_street(r)
+    town_part = " ".join(x for x in [r.get("postcode", ""), r.get("town", "")] if x).strip()
+    if line and town_part:
+        return f"{line}, {town_part}"
+    return line or town_part
+
+
+def maps_link(r):
+    """Tap-to-navigate Google Maps URL. Prefer exact coordinates, else address/name search."""
+    lat, lon = r.get("lat"), r.get("lon")
+    if lat is not None and lon is not None:
+        return f"https://www.google.com/maps/search/?api=1&query={lat},{lon}"
+    query = full_address(r) or r["name"]
+    if r.get("town") and r["town"] not in query:
+        query = f"{query} {r['town']}"
+    return "https://www.google.com/maps/search/?api=1&query=" + urllib.parse.quote(query)
 
 
 def main():
@@ -109,7 +131,8 @@ def main():
 
     headers = [
         "Priority", "Niche", "Business Name", "Website Status",
-        "Phone", "Email", "Street", "Postcode", "Town",
+        "Phone", "Email",
+        "Full Address", "Street", "Postcode", "Town", "Google Maps Link",
         "Source URL (if broken)", "Notes",
         "Outreach Status", "Owner", "Next Action", "Last Contacted",
     ]
@@ -121,8 +144,9 @@ def main():
             status = "No website" if r["tier"] == "A_no_website" else "Broken website"
             w.writerow([
                 priority(r), r["_niche"], r["name"], status,
-                r["phone"], r["email"], full_address(r), r["postcode"],
-                r["town"] or "Linz area",
+                r["phone"], r["email"],
+                full_address(r), full_street(r), r["postcode"],
+                r["town"] or "Linz area", maps_link(r),
                 r["website"] if r["tier"] == "B_broken_website" else "",
                 r["web_detail"] if r["tier"] == "B_broken_website" else "",
                 "Not contacted", "", "", "",
@@ -155,14 +179,14 @@ def main():
         group = by_niche[(order, niche)]
         md.append(f"## {niche} ({len(group)})")
         md.append("")
-        md.append("| Priority | Business | Status | Phone | Email | Address | Town |")
-        md.append("|----------|----------|--------|-------|-------|---------|------|")
+        md.append("| Priority | Business | Status | Phone | Email | Address | Map |")
+        md.append("|----------|----------|--------|-------|-------|---------|-----|")
         for r in group:
             status = "No site" if r["tier"] == "A_no_website" else "BROKEN"
             addr = full_address(r) or "—"
             md.append(
                 f"| {priority(r)} | {r['name']} | {status} | {r['phone'] or '—'} "
-                f"| {r['email'] or '—'} | {addr} | {r['town'] or 'Linz area'} |"
+                f"| {r['email'] or '—'} | {addr} | [map]({maps_link(r)}) |"
             )
         md.append("")
 

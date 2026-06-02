@@ -149,6 +149,13 @@ def main():
             continue
         seen.add(key)
 
+        # Coordinates: nodes have lat/lon directly; ways/relations have a "center".
+        lat = el.get("lat")
+        lon = el.get("lon")
+        if lat is None and "center" in el:
+            lat = el["center"].get("lat")
+            lon = el["center"].get("lon")
+
         rows.append({
             "name": name.strip(),
             "category": category_of(t),
@@ -156,6 +163,8 @@ def main():
             "housenumber": t.get("addr:housenumber", ""),
             "postcode": t.get("addr:postcode", ""),
             "town": t.get("addr:city", ""),
+            "lat": lat,
+            "lon": lon,
             "phone": t.get("phone") or t.get("contact:phone") or "",
             "email": t.get("email") or t.get("contact:email") or "",
             "website": t.get("website") or t.get("contact:website") or t.get("url") or "",

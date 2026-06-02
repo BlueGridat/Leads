@@ -5,6 +5,11 @@ Master lead pipeline for BlueGrid — local businesses we can sell websites to.
 **`leads.csv` is the go-to spreadsheet.** Open it in Excel or Google Sheets. It contains
 **only qualified leads**: local businesses that **need a website** and that we can **actually reach**.
 
+**`dentists_linz_all.csv` is the complete dentist roster** — *every* dentist in the greater Linz
+area regardless of website status (no site, broken site, **and** those that already have a working
+site), so the whole market can be reviewed one by one. 39 dentists: 25 in Linz proper, 14 in
+surrounding towns. `dentists_linz_all.md` is the readable version.
+
 ## Current data: Greater Linz — 182 qualified leads
 
 | Niche | Leads |
@@ -75,6 +80,9 @@ python3 tools/scrape_leads.py        # writes data/<region>_raw.json
 
 # 2. Build the qualified spreadsheet from the raw data
 python3 tools/build_spreadsheet.py   # writes leads.csv + leads.md
+
+# 3. (optional) Build the COMPLETE dentist roster (all dentists, every status)
+python3 tools/build_dentist_roster.py   # writes dentists_linz_all.csv + .md
 ```
 
 To target another city (Wels, Steyr, Graz, Salzburg…), change `REGION` and `BBOX` near the top of
